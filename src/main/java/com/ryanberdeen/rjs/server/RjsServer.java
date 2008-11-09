@@ -39,12 +39,26 @@ public class RjsServer {
 
 		ioAcceptor.setHandler(new RjsServerHandler(ioAcceptor));
 	}
+	
+	/** Returns the locally bound port.
+	 */
+	public int getPort() {
+		return port;
+	}
 
-	public void run() throws IOException {
+	/** Starts accepting connections.
+	 */
+	public void start() throws IOException {
 		ioAcceptor.bind(new InetSocketAddress(port));
+	}
+	
+	/** Closes all active connections and stops accepting new ones.
+	 */
+	public void stop() {
+		ioAcceptor.unbind();
 	}
 
 	public static void main(String[] args) throws IOException {
-		new RjsServer(1843).run();
+		new RjsServer(1843).start();
 	}
 }
