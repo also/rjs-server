@@ -33,6 +33,11 @@ class RjsServerHandler extends IoHandlerAdapter {
 		"<allow-access-from domain=\"*\" to-ports=\"*\"/>" +
 		"</cross-domain-policy>";
 
+	public static final String HI_MESSAGE = "hi";
+	public static final String SESSION_STARTED_KEY = RjsServerHandler.class + ".sessionStarted";
+
+	public static final String EXPECTED_HI_MESSAGE = "expected hi";
+
 	private IoHandler delegate;
 
 	public RjsServerHandler(IoHandler delegate) {
@@ -41,12 +46,12 @@ class RjsServerHandler extends IoHandlerAdapter {
 
 	@Override
 	public void sessionCreated(IoSession session) throws Exception {
-		delegate.sessionCreated(session);
+		// ignore
 	}
 
 	@Override
 	public void sessionOpened(IoSession session) throws Exception {
-		delegate.sessionOpened(session);
+		// ignore
 	}
 
 	@Override
@@ -63,6 +68,19 @@ class RjsServerHandler extends IoHandlerAdapter {
 	public void messageReceived(IoSession session, Object message) throws Exception {
 		if (message.equals(POLICY_FILE_REQUEST)) {
 			session.write(POLICY_FILE_CONTENTS);
+		}
+		else if (message.equals(HI_MESSAGE)) {
+			if (!session.containsAttribute(SESSION_STARTED_KEY)) {
+				session.setAttribute(SESSION_STARTED_KEY);
+				delegate.sessionOpened(session);
+			}
+			else {
+				delegate.messageReceived(session, message);
+			}
+		}
+		else if (!session.containsAttribute(SESSION_STARTED_KEY)) {
+			session.write(EXPECTED_HI_MESSAGE);
+			session.close();
 		}
 		else {
 			delegate.messageReceived(session, message);
