@@ -19,11 +19,12 @@
 
 package com.ryanberdeen.rjs.server;
 
-import org.apache.mina.core.service.IoAcceptor;
+import org.apache.mina.core.service.IoHandler;
 import org.apache.mina.core.service.IoHandlerAdapter;
+import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
 
-public class RjsServerHandler extends IoHandlerAdapter {
+class RjsServerHandler extends IoHandlerAdapter {
 	public static final String POLICY_FILE_REQUEST = "<policy-file-request/>";
 	public static final String POLICY_FILE_CONTENTS = "<?xml version=\"1.0\"?>" +
 		"<!DOCTYPE cross-domain-policy SYSTEM \"/xml/dtds/cross-domain-policy.dtd\">" +
@@ -32,18 +33,49 @@ public class RjsServerHandler extends IoHandlerAdapter {
 		"<allow-access-from domain=\"*\" to-ports=\"*\"/>" +
 		"</cross-domain-policy>";
 
-	private IoAcceptor ioAcceptor;
+	private IoHandler delegate;
 
-	public RjsServerHandler(IoAcceptor ioAcceptor) {
-		this.ioAcceptor = ioAcceptor;
+	public RjsServerHandler(IoHandler delegate) {
+		this.delegate = delegate;
 	}
 
+	@Override
+	public void sessionCreated(IoSession session) throws Exception {
+		delegate.sessionCreated(session);
+	}
+
+	@Override
+	public void sessionOpened(IoSession session) throws Exception {
+		delegate.sessionOpened(session);
+	}
+
+	@Override
+	public void sessionIdle(IoSession session, IdleStatus status) throws Exception {
+		delegate.sessionIdle(session, status);
+	}
+
+	@Override
+	public void sessionClosed(IoSession session) throws Exception {
+		delegate.sessionClosed(session);
+	}
+
+	@Override
 	public void messageReceived(IoSession session, Object message) throws Exception {
 		if (message.equals(POLICY_FILE_REQUEST)) {
 			session.write(POLICY_FILE_CONTENTS);
 		}
 		else {
-			ioAcceptor.broadcast(message);
+			delegate.messageReceived(session, message);
 		}
+	}
+
+	@Override
+	public void messageSent(IoSession session, Object message) throws Exception {
+		delegate.messageSent(session, message);
+	}
+
+	@Override
+	public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
+		delegate.exceptionCaught(session, cause);
 	}
 }

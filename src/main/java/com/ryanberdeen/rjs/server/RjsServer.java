@@ -24,6 +24,7 @@ import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 
 import org.apache.mina.core.service.IoAcceptor;
+import org.apache.mina.core.service.IoHandler;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
@@ -31,34 +32,31 @@ import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 public class RjsServer {
 	private IoAcceptor ioAcceptor;
 	private int port;
+	private IoHandler ioHandler;
 
-	public RjsServer(int port) {
+	public void setPort(int port) {
 		this.port = port;
-		ioAcceptor = new NioSocketAcceptor();
-		ioAcceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(new TextLineCodecFactory(Charset.forName("UTF-8"), "\0", "\0")));
-
-		ioAcceptor.setHandler(new RjsServerHandler(ioAcceptor));
 	}
-	
-	/** Returns the locally bound port.
-	 */
-	public int getPort() {
-		return port;
+
+	public void setIoHandler(IoHandler ioHandler) {
+		this.ioHandler = ioHandler;
 	}
 
 	/** Starts accepting connections.
 	 */
 	public void start() throws IOException {
+		ioAcceptor = new NioSocketAcceptor();
+		ioAcceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(new TextLineCodecFactory(Charset.forName("UTF-8"), "\0", "\0")));
+
+		ioAcceptor.setHandler(new RjsServerHandler(ioHandler));
+
 		ioAcceptor.bind(new InetSocketAddress(port));
 	}
-	
+
 	/** Closes all active connections and stops accepting new ones.
 	 */
 	public void stop() {
 		ioAcceptor.unbind();
-	}
-
-	public static void main(String[] args) throws IOException {
-		new RjsServer(1843).start();
+		ioAcceptor.dispose();
 	}
 }
