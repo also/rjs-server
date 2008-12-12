@@ -22,26 +22,34 @@ package com.ryanberdeen.rjs.server;
 /**
  * Handles all events from {@link RjsClient}s.
  *
- * @param <C> the class of <code>RjsClient</code>
+ * @since 0.1
  */
 public interface RjsHandler {
 	/**
 	 * Called after the client has connected.
+	 *
+	 * @since 0.1
 	 */
 	public void clientConnected(RjsClient client) throws Exception;
 
 	/**
 	 * Called when a message has been received from a client.
+	 *
+	 * @since 0.1
 	 */
 	public void messageReceived(RjsClient client, String message) throws Exception;
 
 	/**
 	 * Called when an exception is thrown while handling a client event.
+	 *
+	 * @since 0.1
 	 */
 	public void exceptionCaught(RjsClient client, Throwable t);
 
 	/**
 	 * Called after a client has disconnected.
+	 *
+	 * @since 0.1
 	 */
 	public void clientDisconnected(RjsClient client) throws Exception;
 }

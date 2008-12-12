@@ -25,6 +25,8 @@ import org.apache.mina.core.session.IoSession;
 
 /**
  * {@link IoSession} implementation of {@link RjsClient}.
+ *
+ * @since 0.1
  */
 public class IoSessionRjsClient implements RjsClient {
 	private IoSession session;
@@ -35,6 +37,8 @@ public class IoSessionRjsClient implements RjsClient {
 
 	/**
 	 * Returns the {@link IoSession} of the connected client.
+	 *
+	 * @since 0.1
 	 */
 	public IoSession getIoSession() {
 		return session;

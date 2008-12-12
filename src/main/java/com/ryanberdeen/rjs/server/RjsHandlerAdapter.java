@@ -19,6 +19,11 @@
 
 package com.ryanberdeen.rjs.server;
 
+/**
+ * Abstract adapter class for {@link RjsHandler}.
+ *
+ * @since 0.1
+ */
 public class RjsHandlerAdapter implements RjsHandler {
 	public void clientConnected(RjsClient client) throws Exception {}
 

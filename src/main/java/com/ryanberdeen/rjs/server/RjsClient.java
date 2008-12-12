@@ -23,6 +23,8 @@ import java.net.SocketAddress;
 
 /**
  * Interface to a connected client.
+ *
+ * @since 0.1
  */
 public interface RjsClient {
 	/**
@@ -32,6 +34,7 @@ public interface RjsClient {
 	 * @param value the value of the attribute
 	 * @return the previous value of the attribute, or <code>null</code> if the
 	 *         attribute is not set
+	 * @since 0.1
 	 */
 	public Object setAttribute(String key, Object value);
 
@@ -41,26 +44,35 @@ public interface RjsClient {
 	 * @param key the key of the attribute
 	 * @return the value of the attribute, or <code>null</code> if the
 	 *         attribute is not set
+	 * @since 0.1
 	 */
 	public Object getAttribute(String key);
 
 	/**
 	 * Sends a message to the client.
+	 *
+	 * @since 0.1
 	 */
 	public void send(String message);
 
 	/**
 	 * Returns the local socket address.
+	 *
+	 * @since 0.1
 	 */
 	public SocketAddress getLocalAddress();
 
 	/**
 	 * Returns the remote socket address.
+	 *
+	 * @since 0.1
 	 */
 	public SocketAddress getRemoteAddress();
 
 	/**
 	 * Closes the connection to the client.
+	 *
+	 * @since 0.1
 	 */
 	public void close();
 }

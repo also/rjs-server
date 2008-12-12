@@ -30,6 +30,8 @@ import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 
 /**
  * The main interface between a Java application and rjs Server.
+ *
+ * @since 0.1
  */
 public class RjsServer {
 	private IoAcceptor ioAcceptor;
@@ -39,6 +41,8 @@ public class RjsServer {
 
 	/**
 	 * Sets the port the server will listen on.
+	 *
+	 * @since 0.1
 	 */
 	public void setPort(int port) {
 		this.port = port;
@@ -46,6 +50,8 @@ public class RjsServer {
 
 	/**
 	 * Sets the target of rjs events.
+	 *
+	 * @since 0.1
 	 */
 	public void setHandler(RjsHandler handler) {
 		this.handler = handler;
@@ -53,6 +59,8 @@ public class RjsServer {
 
 	/**
 	 * Binds to the port and starts accepting connections.
+	 *
+	 * @since 0.1
 	 */
 	public void start() throws IOException {
 		ioAcceptor = new NioSocketAcceptor();
@@ -65,6 +73,8 @@ public class RjsServer {
 
 	/**
 	 * Closes all active connections and stops accepting new ones.
+	 *
+	 * @since 0.1
 	 */
 	public void stop() {
 		ioAcceptor.unbind();
