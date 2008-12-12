@@ -19,7 +19,6 @@
 
 package com.ryanberdeen.rjs.server;
 
-import org.apache.mina.core.service.IoHandler;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
@@ -34,14 +33,15 @@ class RjsServerHandler extends IoHandlerAdapter {
 		"</cross-domain-policy>";
 
 	public static final String HI_MESSAGE = "hi";
-	public static final String SESSION_STARTED_KEY = RjsServerHandler.class + ".sessionStarted";
 
 	public static final String EXPECTED_HI_MESSAGE = "expected hi";
 
-	private IoHandler delegate;
+	public static final String RJS_CLIENT_KEY = RjsServerHandler.class + ".rjsClient";
 
-	public RjsServerHandler(IoHandler delegate) {
-		this.delegate = delegate;
+	private RjsHandler rjsHandler;
+
+	public RjsServerHandler(RjsHandler rjsHandler) {
+		this.rjsHandler = rjsHandler;
 	}
 
 	@Override
@@ -56,44 +56,60 @@ class RjsServerHandler extends IoHandlerAdapter {
 
 	@Override
 	public void sessionIdle(IoSession session, IdleStatus status) throws Exception {
-		delegate.sessionIdle(session, status);
+		// ignore
 	}
 
 	@Override
 	public void sessionClosed(IoSession session) throws Exception {
-		delegate.sessionClosed(session);
+		RjsClient client = getClient(session);
+		if (client != null) {
+			rjsHandler.clientDisconnected(client);
+		}
 	}
 
 	@Override
-	public void messageReceived(IoSession session, Object message) throws Exception {
+	public void messageReceived(IoSession session, Object messageObject) throws Exception {
+		String message = (String) messageObject;
+
 		if (message.equals(POLICY_FILE_REQUEST)) {
 			session.write(POLICY_FILE_CONTENTS);
 		}
-		else if (message.equals(HI_MESSAGE)) {
-			if (!session.containsAttribute(SESSION_STARTED_KEY)) {
-				session.setAttribute(SESSION_STARTED_KEY);
-				delegate.sessionOpened(session);
+		else {
+			RjsClient client = getClient(session);
+			if (message.equals(HI_MESSAGE)) {
+				if (client == null) {
+					client = new IoSessionRjsClient(session);
+					session.setAttribute(RJS_CLIENT_KEY, client);
+					rjsHandler.clientConnected(client);
+				}
+				else {
+					rjsHandler.messageReceived(client, message);
+				}
+			}
+			else if (client == null) {
+				session.write(EXPECTED_HI_MESSAGE);
+				session.close();
 			}
 			else {
-				delegate.messageReceived(session, message);
+				rjsHandler.messageReceived(client, message);
 			}
-		}
-		else if (!session.containsAttribute(SESSION_STARTED_KEY)) {
-			session.write(EXPECTED_HI_MESSAGE);
-			session.close();
-		}
-		else {
-			delegate.messageReceived(session, message);
 		}
 	}
 
 	@Override
 	public void messageSent(IoSession session, Object message) throws Exception {
-		delegate.messageSent(session, message);
+		// ignore
 	}
 
 	@Override
 	public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
-		delegate.exceptionCaught(session, cause);
+		RjsClient client = getClient(session);
+		if (client != null) {
+			rjsHandler.exceptionCaught(client, cause);
+		}
+	}
+
+	private RjsClient getClient(IoSession session) {
+		return (RjsClient) session.getAttribute(RJS_CLIENT_KEY);
 	}
 }

@@ -24,7 +24,6 @@ import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 
 import org.apache.mina.core.service.IoAcceptor;
-import org.apache.mina.core.service.IoHandler;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
@@ -32,14 +31,15 @@ import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 public class RjsServer {
 	private IoAcceptor ioAcceptor;
 	private int port;
-	private IoHandler ioHandler;
+
+	private RjsHandler rjsHandler;
 
 	public void setPort(int port) {
 		this.port = port;
 	}
 
-	public void setIoHandler(IoHandler ioHandler) {
-		this.ioHandler = ioHandler;
+	public void setIoHandler(RjsHandler rjsHandler) {
+		this.rjsHandler = rjsHandler;
 	}
 
 	/** Starts accepting connections.
@@ -48,7 +48,7 @@ public class RjsServer {
 		ioAcceptor = new NioSocketAcceptor();
 		ioAcceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(new TextLineCodecFactory(Charset.forName("UTF-8"), "\0", "\0")));
 
-		ioAcceptor.setHandler(new RjsServerHandler(ioHandler));
+		ioAcceptor.setHandler(new RjsServerHandler(rjsHandler));
 
 		ioAcceptor.bind(new InetSocketAddress(port));
 	}
