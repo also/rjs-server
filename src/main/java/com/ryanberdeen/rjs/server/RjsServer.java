@@ -28,32 +28,43 @@ import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 
+/**
+ * The main interface between a Java application and rjs Server.
+ */
 public class RjsServer {
 	private IoAcceptor ioAcceptor;
 	private int port;
 
-	private RjsHandler rjsHandler;
+	private RjsHandler handler;
 
+	/**
+	 * Sets the port the server will listen on.
+	 */
 	public void setPort(int port) {
 		this.port = port;
 	}
 
-	public void setIoHandler(RjsHandler rjsHandler) {
-		this.rjsHandler = rjsHandler;
+	/**
+	 * Sets the target of rjs events.
+	 */
+	public void setHandler(RjsHandler handler) {
+		this.handler = handler;
 	}
 
-	/** Starts accepting connections.
+	/**
+	 * Binds to the port and starts accepting connections.
 	 */
 	public void start() throws IOException {
 		ioAcceptor = new NioSocketAcceptor();
 		ioAcceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(new TextLineCodecFactory(Charset.forName("UTF-8"), "\0", "\0")));
 
-		ioAcceptor.setHandler(new RjsServerHandler(rjsHandler));
+		ioAcceptor.setHandler(new RjsServerHandler(handler));
 
 		ioAcceptor.bind(new InetSocketAddress(port));
 	}
 
-	/** Closes all active connections and stops accepting new ones.
+	/**
+	 * Closes all active connections and stops accepting new ones.
 	 */
 	public void stop() {
 		ioAcceptor.unbind();
